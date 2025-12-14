@@ -39,17 +39,26 @@ export default function ProfileForm({ initialData }: { initialData?: any }) {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) throw new Error('No user found');
 
+            const updates = {
+                username: formData.username,
+                bio: formData.bio,
+                disciplines: formData.disciplines,
+                current_state: formData.current_state,
+                onboarding_answer: formData.onboarding_answer,
+                // Add any other editable fields explicitly
+                updated_at: new Date().toISOString(),
+            };
+
             const { error } = await supabase.from('profiles').upsert({
                 id: user.id,
-                ...formData,
-                updated_at: new Date().toISOString(),
+                ...updates,
             });
 
             if (error) throw error;
             router.push('/feed');
-        } catch (error) {
+        } catch (error: any) {
             console.error('Error updating profile:', error);
-            alert('Error updating profile');
+            alert(`Error updating profile: ${error.message}`);
         } finally {
             setLoading(false);
         }
