@@ -102,10 +102,19 @@ export async function publishProcess(id: string) {
 
     if (!user) throw new Error('Unauthorized');
 
-    // Check Observer Mode
+    // Check Observer Mode - Soft Limit (Allow 1 post)
     const status = await checkObserverMode(user.id);
     if (!status.canPost) {
-        throw new Error(`Observer Mode: You can publish in ${status.daysLeft} days.`);
+        // Check how many published processes they have
+        const { count } = await supabase
+            .from('processes')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', user.id)
+            .eq('status', 'published');
+
+        if (count && count >= 1) {
+            throw new Error(`Observer Mode: You can publish 1 process during your first 3 days. (${status.daysLeft} days left in observation mode)`);
+        }
     }
 
     // Fetch to validate 'required' fields for publishing
