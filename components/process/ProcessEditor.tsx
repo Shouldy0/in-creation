@@ -64,8 +64,10 @@ export default function ProcessEditor({ process }: ProcessEditorProps) {
         setIsPublishing(true);
         try {
             await publishProcess(process.id);
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
+            // Show the error message to the user
+            alert(error.message || "Failed to publish. Please try again.");
             setIsPublishing(false);
         }
     };
