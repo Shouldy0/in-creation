@@ -45,6 +45,7 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
                 <FeedHeader
                     currentState={userCreativeState}
                     viewMode={viewMode}
+                    currentUserId={user.id}
                 />
 
                 <Feed

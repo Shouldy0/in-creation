@@ -13,9 +13,10 @@ import UserSearch from './UserSearch'; // Import
 interface FeedHeaderProps {
     currentState: string;
     viewMode: 'state' | 'following';
+    currentUserId: string;
 }
 
-export default function FeedHeader({ currentState, viewMode }: FeedHeaderProps) {
+export default function FeedHeader({ currentState, viewMode, currentUserId }: FeedHeaderProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [optimisticState, setOptimisticState] = useState(currentState);
@@ -62,6 +63,13 @@ export default function FeedHeader({ currentState, viewMode }: FeedHeaderProps) 
                         }`}
                 >
                     Seguiti
+                </Link>
+
+                <Link
+                    href={`/profile/${currentUserId}`}
+                    className="px-5 py-2 rounded-full text-sm font-medium text-stone hover:text-foreground transition-all"
+                >
+                    Profilo
                 </Link>
 
                 {/* Separator if needed, or just gap */}
