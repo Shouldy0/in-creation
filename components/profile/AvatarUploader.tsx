@@ -48,7 +48,7 @@ export default function AvatarUploader({ url, onUpload }: AvatarUploaderProps) {
             const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
 
             setAvatarUrl(data.publicUrl);
-            onUpload.call(null, data.publicUrl);
+            onUpload(data.publicUrl);
 
         } catch (error: any) {
             console.error('Error uploading avatar:', error);
@@ -94,8 +94,12 @@ export default function AvatarUploader({ url, onUpload }: AvatarUploaderProps) {
                     disabled={uploading}
                 />
             </div>
-            <p className="text-xs text-stone/50 font-serif italic">
-                Upload a profile image
+            <p className="text-xs text-stone/50 font-serif italic text-center max-w-xs break-all">
+                {avatarUrl ? (
+                    <a href={avatarUrl} target="_blank" rel="noopener noreferrer" className="hover:underline text-accent">
+                        Open Image Debug
+                    </a>
+                ) : 'Upload a profile image'}
             </p>
         </div>
     );
