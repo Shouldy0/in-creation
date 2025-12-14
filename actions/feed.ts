@@ -6,6 +6,7 @@ export type FeedFilters = {
     disciplines?: string[];
     phases?: string[];
     needsFeedback?: boolean;
+    type?: 'state' | 'following';
 };
 
 export async function getFeed(filters: FeedFilters = {}) {
@@ -21,7 +22,9 @@ export async function getFeed(filters: FeedFilters = {}) {
         .eq('id', user.id)
         .single();
 
-    if (!currentUserProfile?.current_state) return [];
+    if (!currentUserProfile) return [];
+
+
 
     // 1. Get user's blocked list to exclude
     let blockedIds: string[] = [];
@@ -32,78 +35,122 @@ export async function getFeed(filters: FeedFilters = {}) {
     if (blocks) blockedIds = blocks.map(b => b.blocked_id);
 
     // 2. Build Base Query
-    // STRICT RULE: Only show processes from authors in the SAME creative state
-    let query = supabase
-        .from('processes')
-        .select(`
+    // 3. Apply Filters and Select
+    // Add resonance count to selection
+    // Note: We need to modify the select string.
+    // Re-writing the select to include count.
+
+    // Actually, I can't modify the query object easily after creation.
+    // I should rewrite step 2.
+
+    // START REWRITE: Manual Joins for Stability
+    // 1. Fetch Processes + Profiles (Profiles FK is usually robust or required)
+    let selectQuery = `
             *,
-            profiles!inner (
+            profiles (
                 username,
                 current_state,
                 avatar_url,
                 disciplines
-            ),
-            feedback (id)
-        `)
+            )
+    `;
+
+    // Re-initializing query with new select
+    let mainQuery = supabase
+        .from('processes')
+        .select(selectQuery)
         .eq('status', 'published')
         .eq('visibility', 'public')
-        .eq('profiles.current_state', currentUserProfile.current_state)
-        .neq('user_id', user.id) // Optional: Don't show my own posts in feed? Usually yes for "discovery".
         .order('created_at', { ascending: false });
 
-    // 3. Apply Filters
+    // Apply Filters
+    if (filters.type === 'following') {
+        const { data: follows } = await supabase.from('follows').select('followed_id').eq('follower_id', user.id);
+        const followedIds = follows?.map(f => f.followed_id) || [];
+        if (followedIds.length === 0) return [];
+        mainQuery = mainQuery.in('user_id', followedIds);
+    }
 
-    // Filter: Blocked Users
     if (blockedIds.length > 0) {
-        query = query.not('user_id', 'in', `(${blockedIds.join(',')})`);
+        mainQuery = mainQuery.not('user_id', 'in', `(${blockedIds.join(',')})`);
     }
 
-    // Filter: Phases
     if (filters.phases && filters.phases.length > 0) {
-        query = query.in('phase', filters.phases);
+        mainQuery = mainQuery.in('phase', filters.phases);
     }
 
-    // Filter: Disciplines (requires careful handling as it's an array column on joined table)
-    // Supabase filtering on joined table array columns can be tricky.
-    // For MVP, if easy filtering on joined column isn't working, we might filter in memory or specific RPC.
-    // Let's try standard filter first. NOTE: Supabase JS client doesn't support 'contains' on joined tables easily in all versions.
-    // simpler approach: We fetch and then filter in memory for disciplines if the result set isn't massive.
-    // However, let's try to do it if possible. 
-    // Actually, 'profiles.disciplines' overlaps with user selected disciplines. 
-    // It is simpler to do this in memory for MVP or just skip it if complex.
-    // Let's implement in memory for safely since we already filtering by state heavily reducing dataset.
-
-    const { data, error } = await query;
+    const { data, error } = await mainQuery;
 
     if (error) {
-        console.error('------- FEED ERROR DETAILS -------');
-        console.error('User ID:', user.id);
-        console.error('Status:', error.code, error.message, error.details, error.hint);
-        console.error('Full Error:', JSON.stringify(error, null, 2));
-        console.error('----------------------------------');
+        console.error('Feed Error:', error);
         return [];
     }
 
     let filteredData = data || [];
 
-    // 4. In-Memory Filters (for complexity reduction on DB query)
-
-    // Filter: Disciplines (if Author has ANY of the selected disciplines)
+    // Filter: Disciplines (In-Memory)
     if (filters.disciplines && filters.disciplines.length > 0) {
         filteredData = filteredData.filter((post: any) => {
             const authorDisciplines = post.profiles.disciplines || [];
-            return filters.disciplines!.some(d => authorDisciplines.includes(d));
+            return filters.disciplines!.some((d: string) => authorDisciplines.includes(d));
+        });
+    }
+
+    // --- MANUAL JOINS ---
+    const processIds = filteredData.map((p: any) => p.id);
+
+    // A. Fetch Feedback Counts (if needed for filter or display)
+    // Even if not filtering, "Needs Feedback" badge might rely on it? 
+    // The filter relies on it.
+    let feedbackCounts: Record<string, number> = {};
+    if (processIds.length > 0) {
+        // This is a bit tricky to get counts by group in Supabase without rpc
+        // But we can just fetch all feedback for these posts (lightweight id)
+        // Or rely on the fact that MVP scale is small.
+        const { data: fb } = await supabase
+            .from('feedback')
+            .select('post_id')
+            .in('post_id', processIds);
+
+        fb?.forEach((f: any) => {
+            feedbackCounts[f.post_id] = (feedbackCounts[f.post_id] || 0) + 1;
         });
     }
 
     // Filter: Needs Feedback (count === 0)
-    // Note: feedback(count) returns an array like [{count: 0}]
     if (filters.needsFeedback) {
         filteredData = filteredData.filter((post: any) => {
-            const feedbackCount = post.feedback?.length || 0;
-            return feedbackCount === 0;
+            return (feedbackCounts[post.id] || 0) === 0;
+        });
+        // Re-calculate processIds after filtering? 
+        // No, we already fetched everything, just filtering the result list.
+    }
+
+    // B. Fetch Resonances (Count & My Status)
+    let resonanceCounts: Record<string, number> = {};
+    let myResonances: Set<string> = new Set();
+
+    if (processIds.length > 0) {
+        const { data: res } = await supabase
+            .from('resonances')
+            .select('process_id, user_id')
+            .in('process_id', processIds);
+
+        res?.forEach((r: any) => {
+            resonanceCounts[r.process_id] = (resonanceCounts[r.process_id] || 0) + 1;
+            if (r.user_id === user.id) {
+                myResonances.add(r.process_id);
+            }
         });
     }
 
-    return filteredData;
+    // 5. Merge Data
+    const enrichedData = filteredData.map((post: any) => ({
+        ...post,
+        hasResonated: myResonances.has(post.id),
+        resonanceCount: resonanceCounts[post.id] || 0,
+        feedbackCount: feedbackCounts[post.id] || 0 // Added for good measure
+    }));
+
+    return enrichedData;
 }

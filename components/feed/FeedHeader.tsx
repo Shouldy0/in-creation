@@ -6,14 +6,18 @@ import { ChevronDown, Loader2 } from 'lucide-react';
 
 const CREATIVE_STATES = ['Idea', 'Blocked', 'Flow', 'Revision', 'Resting'];
 
+// Imports updated
+import Link from 'next/link';
+import UserSearch from './UserSearch'; // Import
+
 interface FeedHeaderProps {
     currentState: string;
+    viewMode: 'state' | 'following';
 }
 
-export default function FeedHeader({ currentState }: FeedHeaderProps) {
+export default function FeedHeader({ currentState, viewMode }: FeedHeaderProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    // Optimistic UI state
     const [optimisticState, setOptimisticState] = useState(currentState);
 
     const handleStateChange = async (newState: string) => {
@@ -23,57 +27,75 @@ export default function FeedHeader({ currentState }: FeedHeaderProps) {
         }
 
         setIsLoading(true);
-        setOptimisticState(newState); // Optimistic update
+        setOptimisticState(newState);
         setIsMenuOpen(false);
         try {
             await updateCreativeState(newState);
         } catch (error) {
             console.error('Failed to update state:', error);
-            setOptimisticState(currentState); // Revert
-            // Could add toast here
+            setOptimisticState(currentState);
         } finally {
             setIsLoading(false);
         }
     };
 
     return (
-        <header className="mb-8">
-            <h1 className="text-3xl md:text-4xl font-serif text-foreground mb-4">
-                Studio Feed
-            </h1>
-            <div className="flex items-center gap-3 text-lg md:text-xl text-stone">
-                <span>You are currently in</span>
-                <div className="relative">
-                    <button
-                        onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        disabled={isLoading}
-                        className="flex items-center gap-2 font-medium text-foreground border-b border-foreground/30 hover:border-foreground pb-0.5 transition-all"
-                    >
-                        {optimisticState}
-                        {isLoading ? <Loader2 size={16} className="animate-spin" /> : <ChevronDown size={16} />}
-                    </button>
+        <header className="mb-8 p-4 md:p-0 flex flex-col md:items-center gap-6">
+            <h1 className="text-4xl md:text-5xl font-serif text-foreground text-center">Studio</h1>
 
-                    {isMenuOpen && (
-                        <div className="absolute top-full left-0 mt-2 bg-paper border border-ink rounded shadow-xl py-1 z-50 w-48 min-w-[150px]">
-                            {CREATIVE_STATES.map(s => (
-                                <button
-                                    key={s}
-                                    onClick={() => handleStateChange(s)}
-                                    className={`w-full text-left px-4 py-2 hover:bg-ink transition-colors flex items-center justify-between ${s === optimisticState ? 'text-foreground font-medium' : 'text-stone'
-                                        }`}
-                                >
-                                    {s}
-                                    {s === optimisticState && <div className="w-1.5 h-1.5 rounded-full bg-accent" />}
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-                <span>mode.</span>
+            {/* Segmented Control */}
+            <div className="flex bg-paper p-1.5 rounded-full border border-ink w-fit mx-auto">
+                <Link
+                    href="/feed?type=state"
+                    className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${viewMode === 'state'
+                        ? 'bg-foreground text-background shadow-sm'
+                        : 'text-stone hover:text-foreground'
+                        }`}
+                >
+                    Scopri
+                </Link>
+                <Link
+                    href="/feed?type=following"
+                    className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${viewMode === 'following'
+                        ? 'bg-foreground text-background shadow-sm'
+                        : 'text-stone hover:text-foreground'
+                        }`}
+                >
+                    Seguiti
+                </Link>
             </div>
-            <p className="text-sm text-stone/60 mt-2">
-                Showing others in the same headspace.
-            </p>
+
+            {/* User Search - Integrated */}
+            <UserSearch />
+
+            {viewMode === 'state' && (
+                <div className="flex items-center justify-center gap-2 text-stone text-sm">
+                    <span>Viewing:</span>
+                    <div className="relative inline-block">
+                        <button
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            className="font-medium text-foreground border-b border-stone/30 hover:border-foreground transition-all flex items-center gap-1"
+                        >
+                            {optimisticState} Mode
+                            <ChevronDown size={14} />
+                        </button>
+                        {/* Dropdown (Simplified) */}
+                        {isMenuOpen && (
+                            <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-paper border border-ink rounded-lg shadow-xl py-1 z-50 w-40 text-left">
+                                {CREATIVE_STATES.map(s => (
+                                    <button
+                                        key={s}
+                                        onClick={() => handleStateChange(s)}
+                                        className={`w-full px-4 py-2 hover:bg-ink text-sm ${s === optimisticState ? 'font-bold' : ''}`}
+                                    >
+                                        {s}
+                                    </button>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </header>
     );
 }

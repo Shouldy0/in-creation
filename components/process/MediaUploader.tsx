@@ -40,9 +40,10 @@ export default function MediaUploader({ processId, initialUrl, initialType, onUp
             setPreviewUrl(data.publicUrl);
             onUploadComplete(data.publicUrl, type);
 
-        } catch (error) {
+        } catch (error: any) {
             console.error('Upload failed', error);
-            alert('Upload failed');
+            // alert('Upload failed'); // Removed alert
+            // Could add a toast here if available, or just log for MVP
         } finally {
             setUploading(false);
         }

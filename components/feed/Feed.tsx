@@ -2,17 +2,18 @@
 
 import { useState, useEffect } from 'react';
 import { getFeed, FeedFilters } from '@/actions/feed';
-import FeedHeader from './FeedHeader';
 import FilterPanel from './FilterPanel';
 import ProcessCard from './ProcessCard';
 import EmptyState from './EmptyState';
+import { ProcessCardSkeleton } from '@/components/ui/Skeleton';
 
 interface FeedProps {
     initialPosts: any[];
     userCreativeState: string;
+    currentUserId?: string;
 }
 
-export default function Feed({ initialPosts, userCreativeState }: FeedProps) {
+export default function Feed({ initialPosts, userCreativeState, currentUserId }: FeedProps) {
     const [posts, setPosts] = useState(initialPosts);
     const [filters, setFilters] = useState<FeedFilters>({
         disciplines: [],
@@ -73,28 +74,37 @@ export default function Feed({ initialPosts, userCreativeState }: FeedProps) {
 
     return (
         <div className="space-y-6">
-            <FeedHeader currentState={userCreativeState} />
-
             <FilterPanel
                 filters={filters}
                 onFilterChange={setFilters}
             />
 
-            <div className={`transition-opacity duration-300 ${isFiltering ? 'opacity-50' : 'opacity-100'}`}>
-                {posts.length === 0 ? (
-                    <EmptyState />
-                ) : (
-                    <div className="grid gap-6">
-                        {posts.map(post => (
-                            <ProcessCard key={post.id} process={post} />
-                        ))}
-                    </div>
-                )}
-            </div>
+            {isFiltering ? (
+                <div className="space-y-6 animate-fade">
+                    <ProcessCardSkeleton />
+                    <ProcessCardSkeleton />
+                </div>
+            ) : (
+                <div className="animate-fade">
+                    {posts.length === 0 ? (
+                        <EmptyState />
+                    ) : (
+                        <div className="grid gap-6">
+                            {posts.map(post => (
+                                <ProcessCard
+                                    key={post.id}
+                                    process={post}
+                                    currentUserId={currentUserId}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
 
-            {posts.length > 0 && (
+            {posts.length > 0 && !isFiltering && (
                 <p className="text-center text-stone text-sm py-8 italic">
-                    You're all caught up.
+                    Tutto letto. Sei al passo.
                 </p>
             )}
         </div>

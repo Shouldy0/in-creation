@@ -38,18 +38,17 @@ export default function FilterPanel({ filters, onFilterChange }: FilterPanelProp
     const activeCount = (filters.disciplines?.length || 0) + (filters.phases?.length || 0) + (filters.needsFeedback ? 1 : 0);
 
     return (
-        <div className="border-b border-ink/50 py-4">
+        <div className="py-2">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center gap-2 text-sm text-stone hover:text-foreground transition-colors"
+                className="text-sm font-medium text-stone hover:text-foreground transition-colors border-b border-transparent hover:border-ink pb-0.5"
             >
-                <Filter size={16} />
-                <span>Filters {activeCount > 0 && `(${activeCount})`}</span>
-                {isOpen ? <X size={16} className="ml-2" /> : null}
+                {isOpen ? 'Hide Filters' : 'Filter View'}
+                {activeCount > 0 && <span className="ml-2 text-xs bg-ink px-1.5 py-0.5 rounded-full text-foreground">{activeCount}</span>}
             </button>
 
             {isOpen && (
-                <div className="mt-6 space-y-8 animate-in slide-in-from-top-2 fade-in duration-200">
+                <div className="mt-6 mb-8 space-y-8 animate-in slide-in-from-top-2 fade-in duration-200 border-l border-ink pl-4">
                     {/* Disciplines */}
                     <div className="space-y-3">
                         <h4 className="text-xs font-medium text-stone uppercase tracking-wider">Discipline</h4>
@@ -61,8 +60,8 @@ export default function FilterPanel({ filters, onFilterChange }: FilterPanelProp
                                         key={d}
                                         onClick={() => toggleDiscipline(d)}
                                         className={`px-3 py-1.5 rounded text-sm transition-all border ${isActive
-                                                ? 'bg-foreground text-background border-foreground'
-                                                : 'bg-transparent text-stone border-ink hover:border-stone'
+                                            ? 'bg-foreground text-background border-foreground'
+                                            : 'bg-transparent text-stone border-ink hover:border-stone'
                                             }`}
                                     >
                                         {d}
@@ -83,8 +82,8 @@ export default function FilterPanel({ filters, onFilterChange }: FilterPanelProp
                                         key={p}
                                         onClick={() => togglePhase(p)}
                                         className={`px-3 py-1.5 rounded text-sm transition-all border ${isActive
-                                                ? 'bg-foreground text-background border-foreground'
-                                                : 'bg-transparent text-stone border-ink hover:border-stone'
+                                            ? 'bg-foreground text-background border-foreground'
+                                            : 'bg-transparent text-stone border-ink hover:border-stone'
                                             }`}
                                     >
                                         {p}

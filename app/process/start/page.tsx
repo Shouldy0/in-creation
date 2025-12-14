@@ -105,14 +105,17 @@ export default function NewProcessPage() {
 
     if (successId) {
         return (
-            <div className="flex flex-col items-center justify-center min-h-screen text-stone space-y-4">
-                <h2 className="text-xl font-serif text-green-500">Project Created!</h2>
-                <p className="font-mono text-sm">ID: {successId}</p>
+            <div className="flex flex-col items-center justify-center min-h-screen text-stone space-y-6 animate-fade">
+                <div className="w-12 h-12 rounded-full bg-ink flex items-center justify-center">
+                    <span className="text-xl">✨</span>
+                </div>
+                <h2 className="text-xl font-serif text-foreground">Project Created</h2>
+
                 <button
                     onClick={() => router.push(`/process/${successId}/edit`)}
-                    className="px-6 py-3 bg-foreground text-background rounded-full font-bold hover:opacity-90"
+                    className="px-6 py-3 bg-foreground text-background rounded-full font-bold hover:opacity-90 transition-opacity"
                 >
-                    Open Editor ➔
+                    Open Studio
                 </button>
             </div>
         );

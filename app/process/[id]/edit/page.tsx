@@ -112,13 +112,7 @@ export default function EditProcessPage({ params }: { params: Promise<{ id: stri
     return (
         <main className="min-h-screen bg-background p-4 md:p-8 relative">
             {/* System Status Dashboard (Temporary for Debugging) */}
-            <div className="mb-4 p-4 bg-ink/50 rounded border border-stone/20 text-xs font-mono text-stone">
-                <p><strong>System Status: v5.1</strong></p>
-                <p>User: {loading ? 'Loading...' : 'Authenticated'}</p>
-                <p>Process ID: {id}</p>
-                <p>Data Loaded: {processData ? 'YES' : 'NO'}</p>
-                <p>Error: {error || 'None'}</p>
-            </div>
+            {/* System Status Dashboard Removed for Clean UI */}
 
             <ProcessEditor process={processData} />
         </main>

@@ -23,6 +23,32 @@ body {
   color: #0a0a0a;
 }
 
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .animate-fade {
+    @apply transition-opacity duration-200 ease-in-out;
+  }
+
+  .animate-slide-down {
+    animation: slideDown 0.2s ease-out forwards;
+  }
+}
+
 @layer utilities {
   .text-balance {
     text-wrap: balance;

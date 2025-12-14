@@ -30,24 +30,30 @@ export default function ProcessEditor({ process }: ProcessEditorProps) {
 
     // Autosave Logic
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const pendingUpdates = useRef<Record<string, any>>({});
 
-    const handleChange = (field: string, value: any) => {
-        const newData = { ...formData, [field]: value };
-        setFormData(newData);
+    const handleAutosave = (newUpdates: Record<string, any>) => {
+        // Merge new updates into pending
+        pendingUpdates.current = { ...pendingUpdates.current, ...newUpdates };
+        setFormData((prev: any) => ({ ...prev, ...newUpdates }));
         setSaving(true);
 
         if (timeoutRef.current) clearTimeout(timeoutRef.current);
 
         timeoutRef.current = setTimeout(async () => {
             try {
-                await updateProcessAutosave(process.id, { [field]: value });
+                const updatesToSend = { ...pendingUpdates.current };
+                pendingUpdates.current = {}; // Clear pending
+
+                await updateProcessAutosave(process.id, updatesToSend);
+
                 setSaving(false);
                 setLastSaved(new Date());
             } catch (error) {
                 console.error("Autosave failed", error);
-                setSaving(false); // Should show error state practically
+                setSaving(false);
             }
-        }, 2000); // 2 seconds debounce
+        }, 2000);
     };
 
     const handlePublish = async () => {
@@ -58,7 +64,6 @@ export default function ProcessEditor({ process }: ProcessEditorProps) {
         setIsPublishing(true);
         try {
             await publishProcess(process.id);
-            // Redirect handled by server action usually, but we can also router.push if needed
         } catch (error) {
             console.error(error);
             setIsPublishing(false);
@@ -94,10 +99,10 @@ export default function ProcessEditor({ process }: ProcessEditorProps) {
                     {PHASES.map(phase => (
                         <button
                             key={phase}
-                            onClick={() => handleChange('phase', phase)}
+                            onClick={() => handleAutosave({ phase })}
                             className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${formData.phase === phase
-                                    ? 'bg-ink border-stone text-foreground'
-                                    : 'text-stone hover:text-foreground border border-transparent'
+                                ? 'bg-ink border-stone text-foreground'
+                                : 'text-stone hover:text-foreground border border-transparent'
                                 }`}
                         >
                             {phase}
@@ -110,9 +115,11 @@ export default function ProcessEditor({ process }: ProcessEditorProps) {
                     processId={process.id}
                     initialUrl={formData.media_url}
                     initialType={formData.media_type}
-                    onUploadComplete={(url, type) => {
-                        handleChange('media_url', url);
-                        handleChange('media_type', type);
+                    onUploadComplete={(url: string | undefined, type: string | undefined) => {
+                        handleAutosave({
+                            media_url: url,
+                            media_type: type
+                        });
                     }}
                 />
 
@@ -122,14 +129,14 @@ export default function ProcessEditor({ process }: ProcessEditorProps) {
                         type="text"
                         placeholder="Title (optional)"
                         value={formData.title || ''}
-                        onChange={(e) => handleChange('title', e.target.value)}
+                        onChange={(e) => handleAutosave({ title: e.target.value })}
                         className="w-full bg-transparent text-3xl font-serif text-foreground placeholder:text-stone/40 focus:outline-none"
                     />
 
                     <textarea
                         placeholder="What's happening in your process right now?"
                         value={formData.description || ''}
-                        onChange={(e) => handleChange('description', e.target.value)}
+                        onChange={(e) => handleAutosave({ description: e.target.value })}
                         className="w-full bg-transparent text-lg text-stone placeholder:text-stone/40 focus:outline-none min-h-[200px] resize-none leading-relaxed"
                     />
                 </div>

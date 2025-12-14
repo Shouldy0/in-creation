@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
 
@@ -9,6 +9,7 @@ type ProfileData = {
     bio: string;
     disciplines: string[];
     current_state: 'Idea' | 'Blocked' | 'Flow' | 'Revision' | 'Resting';
+    onboarding_answer?: string;
 };
 
 const DISCIPLINES_LIST = [
@@ -23,11 +24,11 @@ export default function ProfileForm({ initialData }: { initialData?: any }) {
         bio: '',
         disciplines: [],
         current_state: 'Resting',
-        ...initialData // Override defaults if data exists
+        onboarding_answer: '',
+        ...initialData
     });
     const [loading, setLoading] = useState(false);
     const router = useRouter();
-    // const supabase = createClient(); // Moved inside handleSubmit
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -65,7 +66,28 @@ export default function ProfileForm({ initialData }: { initialData?: any }) {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-8 max-w-lg mx-auto">
-            <div className="space-y-4">
+
+            {/* Entry Ritual: Question */}
+            <div className="p-6 bg-paper rounded-lg border border-stone/20 mb-8">
+                <h3 className="font-serif text-lg text-foreground mb-4">Entry Intention</h3>
+                <label className="block text-sm text-stone mb-2">
+                    What are you looking for in this space?
+                </label>
+                <textarea
+                    required
+                    minLength={5}
+                    className="w-full px-4 py-2 bg-ink border border-graphite rounded-md text-foreground focus:border-accent focus:outline-none h-32 resize-none"
+                    placeholder="Reflect on your creative needs..."
+                    value={formData.onboarding_answer || ''}
+                    onChange={e => setFormData({ ...formData, onboarding_answer: e.target.value })}
+                />
+                <p className="text-xs text-stone/60 mt-2 leading-relaxed">
+                    For the first 3 days, you are invited to observe, listen, and resonate.
+                    Core features unlock gradually to protect the culture.
+                </p>
+            </div>
+
+            <div className="space-y-6">
                 <div>
                     <label className="block text-sm font-medium text-stone mb-1">Username</label>
                     <input

@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { createClient } from '@/utils/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { checkObserverMode } from '@/utils/access';
 
 const ProcessSchema = z.object({
     title: z.string().optional(), // Optional for drafts
@@ -25,11 +26,11 @@ export async function createDraftProcess() {
         redirect('/login');
     }
 
-    // Get basic profile info for defaults?
-    // Actually we just set defaults.
-
-    // 0. Clean up old empty drafts? (Optional hygiene)
-    // await supabase.from('processes').delete().eq('user_id', user.id).eq('status', 'draft').is('description', null);
+    // Check Observer Mode
+    const status = await checkObserverMode(user.id);
+    if (!status.canPost) {
+        return { success: false, error: `Observer Mode: You can create processes in ${status.daysLeft} days.` };
+    }
 
     // Ensure profile exists to satisfy foreign key constraint
     const { data: profile } = await supabase.from('profiles').select('id').eq('id', user.id).single();
@@ -100,6 +101,12 @@ export async function publishProcess(id: string) {
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) throw new Error('Unauthorized');
+
+    // Check Observer Mode
+    const status = await checkObserverMode(user.id);
+    if (!status.canPost) {
+        throw new Error(`Observer Mode: You can publish in ${status.daysLeft} days.`);
+    }
 
     // Fetch to validate 'required' fields for publishing
     const { data: process } = await supabase.from('processes').select('*').eq('id', id).single();
