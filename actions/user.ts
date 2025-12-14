@@ -83,19 +83,19 @@ export async function updateProfile(formData: {
 
     const { error } = await supabase
         .from('profiles')
-        .update({
+        .upsert({
+            id: user.id,
             username: formData.username,
             bio: formData.bio,
             disciplines: formData.disciplines,
             current_state: formData.current_state as any,
             onboarding_answer: formData.onboarding_answer,
             updated_at: new Date().toISOString()
-        })
-        .eq('id', user.id);
+        });
 
     if (error) {
         console.error("Update profile error:", error);
-        throw new Error(error.message); // Pass Supabase error message (e.g., unique violation)
+        throw new Error(error.message);
     }
 
     revalidatePath(`/profile/${user.id}`);
