@@ -3,12 +3,14 @@
 import { useState } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
+import AvatarUploader from './AvatarUploader';
 
 type ProfileData = {
     username: string;
     bio: string;
     disciplines: string[];
     current_state: 'Idea' | 'Blocked' | 'Flow' | 'Revision' | 'Resting';
+    avatar_url?: string;
     onboarding_answer?: string;
 };
 
@@ -24,6 +26,7 @@ export default function ProfileForm({ initialData }: { initialData?: any }) {
         bio: '',
         disciplines: [],
         current_state: 'Resting',
+        avatar_url: '',
         onboarding_answer: '',
         ...initialData,
         disciplines: initialData?.disciplines || [] // Force array
@@ -45,6 +48,7 @@ export default function ProfileForm({ initialData }: { initialData?: any }) {
                 bio: formData.bio,
                 disciplines: formData.disciplines,
                 current_state: formData.current_state,
+                avatar_url: formData.avatar_url,
                 onboarding_answer: formData.onboarding_answer
             });
 
@@ -68,6 +72,14 @@ export default function ProfileForm({ initialData }: { initialData?: any }) {
 
     return (
         <form onSubmit={handleSubmit} className="space-y-8 max-w-lg mx-auto">
+
+            {/* Avatar Uploader */}
+            <div className="flex justify-center mb-8">
+                <AvatarUploader
+                    url={formData.avatar_url}
+                    onUpload={(url) => setFormData({ ...formData, avatar_url: url })}
+                />
+            </div>
 
             {/* Entry Ritual: Question */}
             <div className="p-6 bg-paper rounded-lg border border-stone/20 mb-8">

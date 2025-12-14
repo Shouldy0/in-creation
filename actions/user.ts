@@ -71,6 +71,7 @@ export async function updateProfile(formData: {
     bio: string;
     disciplines: string[];
     current_state: string;
+    avatar_url?: string;
     onboarding_answer?: string;
 }) {
     const supabase = await createClient();
@@ -89,6 +90,7 @@ export async function updateProfile(formData: {
             bio: formData.bio,
             disciplines: formData.disciplines,
             current_state: formData.current_state as any,
+            avatar_url: formData.avatar_url,
             onboarding_answer: formData.onboarding_answer,
             updated_at: new Date().toISOString()
         });
