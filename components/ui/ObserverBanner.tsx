@@ -9,16 +9,25 @@ import { useEffect, useState } from 'react';
 // Let's make it a functional banner component.
 
 export default function ObserverBanner({ daysLeft }: { daysLeft: number }) {
-    if (daysLeft <= 0) return null;
+    const [isVisible, setIsVisible] = useState(true);
+
+    if (daysLeft <= 0 || !isVisible) return null;
 
     return (
-        <div className="w-full bg-paper border-b border-stone/20 p-3 text-center animate-fade">
+        <div className="w-full bg-paper border-b border-stone/20 p-3 text-center animate-fade relative group">
             <p className="text-sm text-stone font-medium">
-                🌱 <span className="text-foreground">Observer Mode Active</span> —
-                You are in a 3-day observation period.
+                🌱 <span className="text-foreground">Observer Mode</span> ·
+                <span className="text-accent ml-1">{daysLeft} day{daysLeft > 1 ? 's' : ''} remaining</span>
+                <span className="hidden sm:inline mx-2 text-stone/40">|</span>
                 <span className="hidden sm:inline"> Take time to listen and resonate before contributing.</span>
-                <span className="ml-2 text-accent">{daysLeft} day{daysLeft > 1 ? 's' : ''} remaining.</span>
             </p>
+            <button
+                onClick={() => setIsVisible(false)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-stone/40 hover:text-foreground transition-colors p-1"
+                aria-label="Dismiss"
+            >
+                ✕
+            </button>
         </div>
     );
 }

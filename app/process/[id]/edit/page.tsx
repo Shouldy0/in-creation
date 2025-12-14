@@ -53,12 +53,12 @@ export default function EditProcessPage({ params }: { params: Promise<{ id: stri
                     throw new Error("Unauthorized");
                 }
 
-                // Check Beta Access
-                const { data: profile } = await supabase.from('profiles').select('beta_access').eq('id', user.id).single();
-                if (!profile?.beta_access) {
-                    router.push('/feed');
-                    return;
-                }
+                // Check Beta Access - REMOVED
+                // const { data: profile } = await supabase.from('profiles').select('beta_access').eq('id', user.id).single();
+                // if (!profile?.beta_access) {
+                //     router.push('/feed');
+                //     return;
+                // }
 
                 setProcessData(data);
             } catch (err: any) {

@@ -34,21 +34,17 @@ export default function NewProcessPage() {
                 }
                 addLog(`User authenticated: ${user.id}`);
 
-                // Check Beta Access
-                const { data: profile } = await supabase.from('profiles').select('beta_access').eq('id', user.id).maybeSingle();
+                // Check Beta Access - REMOVED
+                // const { data: profile } = await supabase.from('profiles').select('beta_access').eq('id', user.id).maybeSingle();
 
-                if (!profile) {
-                    addLog("Profile missing. Attempting creation...");
-                } else if (!profile.beta_access) {
-                    addLog("Beta access denied.");
-                    setError("BETA_ACCESS_DENIED");
-                    setLoading(false); // Stop loading to show error
-                    return;
-                } else {
-                    addLog("Beta access confirmed.");
-                }
+                // if (!profile) {
+                //    addLog("Profile missing. Attempting creation...");
+                // } else {
+                //    addLog("Beta check skipped.");
+                // }
 
                 // 1.5 Ensure Profile Exists (Fix for FK Constraint)
+
                 // Use maybeSingle to avoid 406 error if not found
                 const { data: validationProfile } = await supabase.from('profiles').select('id').eq('id', user.id).maybeSingle();
 
@@ -121,27 +117,7 @@ export default function NewProcessPage() {
         );
     }
 
-    if (error === "BETA_ACCESS_DENIED") {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-screen p-8 text-center space-y-6">
-                <h2 className="text-2xl font-serif text-amber-500">Access Restricted</h2>
-                <p className="text-stone max-w-md">
-                    IN-CREATION is currently opening slowly to beta users.
-                    Your account does not have access yet.
-                </p>
-                <div className="bg-ink p-4 rounded text-left">
-                    <p className="text-xs font-mono text-stone mb-1">USER ID:</p>
-                    <p className="text-sm font-mono text-foreground break-all bg-paper p-1 rounded select-all">
-                        {(logs.find(l => l.startsWith("User authenticated:"))?.split(": ")[1]) || "Unknown"}
-                    </p>
-                </div>
-                <p className="text-stone text-sm">Please ask Daiana to enable beta access for this ID.</p>
-                <button onClick={() => router.push('/feed')} className="text-stone underline text-sm hover:text-foreground">
-                    Back to Feed
-                </button>
-            </div>
-        );
-    }
+    // if (error === "BETA_ACCESS_DENIED") { ... } removed
 
     if (error) {
         return (

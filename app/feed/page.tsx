@@ -26,10 +26,10 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
         .eq('id', user.id)
         .single();
 
-    // Check Beta Access
-    if (!profile?.beta_access) {
-        return <BetaLockScreen />;
-    }
+    // Check Beta Access - REMOVED
+    // if (!profile?.beta_access) {
+    //     return <BetaLockScreen />;
+    // }
 
     // Default to 'Resting' or handle error
     const userCreativeState = profile?.current_state || 'Resting';
