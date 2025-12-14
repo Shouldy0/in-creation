@@ -63,15 +63,19 @@ export default function FeedHeader({ currentState, viewMode }: FeedHeaderProps) 
                 >
                     Seguiti
                 </Link>
+
+                {/* Separator if needed, or just gap */}
+                <div className="w-px bg-stone/20 my-1 mx-1"></div>
+
+                <Link
+                    href="/process/start"
+                    className="px-4 py-2 rounded-full text-sm font-medium text-accent hover:bg-accent/10 transition-colors flex items-center gap-1"
+                >
+                    <span>+</span> New
+                </Link>
             </div>
 
-            {/* Create Action */}
-            <Link
-                href="/process/start"
-                className="absolute top-4 right-4 md:right-0 md:relative md:mx-auto text-sm bg-accent/10 text-accent hover:bg-accent hover:text-white px-4 py-2 rounded-full transition-colors flex items-center gap-2"
-            >
-                <span>+</span> New
-            </Link>
+            {/* Create Action Removed from outside */}
 
             {/* User Search - Integrated */}
             <UserSearch />
