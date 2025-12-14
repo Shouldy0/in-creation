@@ -18,6 +18,8 @@ export const metadata: Metadata = {
     description: 'The social network for the creative process.',
 };
 
+import { GoogleAnalytics } from '@next/third-parties/google';
+
 export default async function RootLayout({
     children,
 }: Readonly<{
@@ -40,6 +42,7 @@ export default async function RootLayout({
                 {user && daysLeft > 0 && <ObserverBanner daysLeft={daysLeft} />}
                 {children}
             </body>
+            {process.env.NEXT_PUBLIC_GA_ID && <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />}
         </html>
     );
 }
