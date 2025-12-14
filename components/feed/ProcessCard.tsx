@@ -33,10 +33,10 @@ export default function ProcessCard({ process, currentUserId }: ProcessCardProps
                             {process.profiles.avatar_url ? (
                                 <img src={process.profiles.avatar_url} alt={process.profiles.username} className="w-full h-full object-cover" />
                             ) : (
-                                process.profiles.username[0]
+                                (process.profiles.username || '?')[0].toUpperCase()
                             )}
                         </div>
-                        <p className="text-xs font-medium text-stone uppercase tracking-wide group-hover:text-foreground transition-colors">{process.profiles.username}</p>
+                        <p className="text-xs font-medium text-stone uppercase tracking-wide group-hover:text-foreground transition-colors">{process.profiles.username || 'Unknown'}</p>
                     </div>
                     <span className="text-[10px] text-stone/60">
                         {process.phase}
