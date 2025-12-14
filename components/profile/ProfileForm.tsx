@@ -25,7 +25,8 @@ export default function ProfileForm({ initialData }: { initialData?: any }) {
         disciplines: [],
         current_state: 'Resting',
         onboarding_answer: '',
-        ...initialData
+        ...initialData,
+        disciplines: initialData?.disciplines || [] // Force array
     });
     const [loading, setLoading] = useState(false);
     const router = useRouter();
