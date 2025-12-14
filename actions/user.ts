@@ -66,6 +66,43 @@ export async function updateCreativeState(newState: string) {
     revalidatePath(`/profile/${user.id}`);
 }
 
+export async function updateProfile(formData: {
+    username: string;
+    bio: string;
+    disciplines: string[];
+    current_state: string;
+    onboarding_answer?: string;
+}) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) throw new Error("Unauthorized");
+
+    // Sanitize and Validate (Basic)
+    if (formData.username.length < 3) throw new Error("Username too short");
+
+    const { error } = await supabase
+        .from('profiles')
+        .update({
+            username: formData.username,
+            bio: formData.bio,
+            disciplines: formData.disciplines,
+            current_state: formData.current_state as any,
+            onboarding_answer: formData.onboarding_answer,
+            updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+    if (error) {
+        console.error("Update profile error:", error);
+        throw new Error(error.message); // Pass Supabase error message (e.g., unique violation)
+    }
+
+    revalidatePath(`/profile/${user.id}`);
+    revalidatePath('/feed');
+    revalidatePath('/settings');
+}
+
 export async function getFollowStatus(targetId: string) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();

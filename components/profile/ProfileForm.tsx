@@ -35,26 +35,18 @@ export default function ProfileForm({ initialData }: { initialData?: any }) {
         setLoading(true);
 
         try {
-            const supabase = createClient();
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) throw new Error('No user found');
+            // Import dynamically or use the imported action
+            // Using the imported action from props or directly
+            const { updateProfile } = await import('@/actions/user');
 
-            const updates = {
+            await updateProfile({
                 username: formData.username,
                 bio: formData.bio,
                 disciplines: formData.disciplines,
                 current_state: formData.current_state,
-                onboarding_answer: formData.onboarding_answer,
-                // Add any other editable fields explicitly
-                updated_at: new Date().toISOString(),
-            };
-
-            const { error } = await supabase.from('profiles').upsert({
-                id: user.id,
-                ...updates,
+                onboarding_answer: formData.onboarding_answer
             });
 
-            if (error) throw error;
             router.push('/feed');
         } catch (error: any) {
             console.error('Error updating profile:', error);
