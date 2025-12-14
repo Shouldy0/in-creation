@@ -1,0 +1,24 @@
+import AuthForm from '@/components/auth/AuthForm';
+import Link from 'next/link';
+
+export default function LoginPage() {
+    return (
+        <main className="flex min-h-screen flex-col items-center justify-center p-8">
+            <div className="w-full max-w-sm space-y-8">
+                <div className="text-center space-y-2">
+                    <h1 className="font-serif text-3xl text-accent">Sign In</h1>
+                    <p className="text-stone">Return to your creative process.</p>
+                </div>
+
+                <AuthForm view="login" />
+
+                <p className="text-center text-sm text-stone">
+                    New to In-Creation?{' '}
+                    <Link href="/signup" className="text-foreground hover:underline">
+                        Join the studio
+                    </Link>
+                </p>
+            </div>
+        </main>
+    );
+}
