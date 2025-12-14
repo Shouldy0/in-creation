@@ -44,7 +44,7 @@ export default function FeedHeader({ currentState, viewMode }: FeedHeaderProps) 
             <h1 className="text-4xl md:text-5xl font-serif text-foreground text-center">Studio</h1>
 
             {/* Segmented Control */}
-            <div className="flex bg-paper p-1.5 rounded-full border border-ink w-fit mx-auto">
+            <div className="flex bg-paper p-1.5 rounded-full border border-ink w-fit mx-auto relative">
                 <Link
                     href="/feed?type=state"
                     className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${viewMode === 'state'
@@ -64,6 +64,14 @@ export default function FeedHeader({ currentState, viewMode }: FeedHeaderProps) 
                     Seguiti
                 </Link>
             </div>
+
+            {/* Create Action */}
+            <Link
+                href="/process/start"
+                className="absolute top-4 right-4 md:right-0 md:relative md:mx-auto text-sm bg-accent/10 text-accent hover:bg-accent hover:text-white px-4 py-2 rounded-full transition-colors flex items-center gap-2"
+            >
+                <span>+</span> New
+            </Link>
 
             {/* User Search - Integrated */}
             <UserSearch />
