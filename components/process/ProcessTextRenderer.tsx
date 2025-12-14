@@ -12,7 +12,7 @@ interface ProcessTextRendererProps {
 export default function ProcessTextRenderer({
     text,
     processId,
-    blocksStatus,
+    blocksStatus = {}, // Default value
     currentUserId
 }: ProcessTextRendererProps) {
     // Split by double newline to identify paragraphs

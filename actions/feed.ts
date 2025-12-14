@@ -91,6 +91,7 @@ export async function getFeed(filters: FeedFilters = {}) {
     // Filter: Disciplines (In-Memory)
     if (filters.disciplines && filters.disciplines.length > 0) {
         filteredData = filteredData.filter((post: any) => {
+            if (!post.profiles) return false; // Skip posts with no profile
             const authorDisciplines = post.profiles.disciplines || [];
             return filters.disciplines!.some((d: string) => authorDisciplines.includes(d));
         });
