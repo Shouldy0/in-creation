@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { Camera, X, Loader2 } from 'lucide-react';
 
@@ -13,6 +13,11 @@ export default function AvatarUploader({ url, onUpload }: AvatarUploaderProps) {
     const [avatarUrl, setAvatarUrl] = useState<string | undefined>(url);
     const [uploading, setUploading] = useState(false);
 
+    // Sync with prop if needed (though local upload usually drives it)
+    useEffect(() => {
+        if (url) setAvatarUrl(url);
+    }, [url]);
+
     const uploadAvatar = async (event: React.ChangeEvent<HTMLInputElement>) => {
         try {
             setUploading(true);
@@ -23,7 +28,9 @@ export default function AvatarUploader({ url, onUpload }: AvatarUploaderProps) {
 
             const file = event.target.files[0];
             const fileExt = file.name.split('.').pop();
-            const filePath = `${Math.random()}.${fileExt}`;
+            // Use timestamp + random string for uniqueness
+            const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+            const filePath = `${fileName}`;
 
             const supabase = createClient();
 
