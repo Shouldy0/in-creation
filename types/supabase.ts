@@ -140,6 +140,113 @@ export interface Database {
                     exercise?: string | null
                 }
             }
+            co_processes: {
+                Row: {
+                    id: string
+                    title: string
+                    description: string | null
+                    status: 'active' | 'archived'
+                    created_at: string
+                    updated_at: string
+                    owner_id: string
+                }
+                Insert: {
+                    id?: string
+                    title: string
+                    description?: string | null
+                    status?: 'active' | 'archived'
+                    created_at?: string
+                    updated_at?: string
+                    owner_id: string
+                }
+                Update: {
+                    id?: string
+                    title?: string
+                    description?: string | null
+                    status?: 'active' | 'archived'
+                    created_at?: string
+                    updated_at?: string
+                    owner_id?: string
+                }
+            }
+            co_process_members: {
+                Row: {
+                    co_process_id: string
+                    user_id: string
+                    role: 'owner' | 'member'
+                    joined_at: string
+                }
+                Insert: {
+                    co_process_id: string
+                    user_id: string
+                    role?: 'owner' | 'member'
+                    joined_at?: string
+                }
+                Update: {
+                    co_process_id?: string
+                    user_id?: string
+                    role?: 'owner' | 'member'
+                    joined_at?: string
+                }
+            }
+            co_process_entries: {
+                Row: {
+                    id: string
+                    co_process_id: string
+                    user_id: string
+                    content: string | null
+                    media_url: string | null
+                    media_type: 'image' | 'audio' | 'video' | null
+                    created_at: string
+                    updated_at: string
+                }
+                Insert: {
+                    id?: string
+                    co_process_id: string
+                    user_id: string
+                    content?: string | null
+                    media_url?: string | null
+                    media_type?: 'image' | 'audio' | 'video' | null
+                    created_at?: string
+                    updated_at?: string
+                }
+                Update: {
+                    id?: string
+                    co_process_id?: string
+                    user_id?: string
+                    content?: string | null
+                    media_url?: string | null
+                    media_type?: 'image' | 'audio' | 'video' | null
+                    created_at?: string
+                    updated_at?: string
+                }
+            }
+            co_process_feedback: {
+                Row: {
+                    id: string
+                    entry_id: string
+                    user_id: string
+                    type: 'works' | 'needs_work' | 'inspired' | 'resonance'
+                    content: string | null
+                    created_at: string
+                }
+                Insert: {
+                    id?: string
+                    entry_id: string
+                    user_id: string
+                    type: 'works' | 'needs_work' | 'inspired' | 'resonance'
+                    content?: string | null
+                    created_at?: string
+                }
+                Update: {
+                    id?: string
+                    entry_id?: string
+                    user_id?: string
+                    type: 'works' | 'needs_work' | 'inspired' | 'resonance'
+                    content?: string | null
+                    created_at?: string
+                }
+            }
         }
     }
 }

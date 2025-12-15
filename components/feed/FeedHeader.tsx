@@ -58,6 +58,13 @@ export default function FeedHeader({ currentState, viewMode, currentUserId }: Fe
                 {currentUserId && (
                     <>
                         <Link
+                            href="/co-process"
+                            className="px-5 py-2 rounded-full text-sm font-medium text-stone hover:text-foreground transition-all"
+                        >
+                            Co-Process
+                        </Link>
+
+                        <Link
                             href="/feed?type=following"
                             className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${viewMode === 'following'
                                 ? 'bg-foreground text-background shadow-sm'
