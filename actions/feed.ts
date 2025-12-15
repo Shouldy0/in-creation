@@ -13,38 +13,27 @@ export async function getFeed(filters: FeedFilters = {}) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) return [];
-
-    // 0. Get current user's profile to know their creative state
-    const { data: currentUserProfile } = await supabase
-        .from('profiles')
-        .select('current_state')
-        .eq('id', user.id)
-        .single();
-
-    if (!currentUserProfile) return [];
-
-
-
-    // 1. Get user's blocked list to exclude
+    // 0. Get current user's profile context (if logged in)
+    let currentUserProfile = null;
     let blockedIds: string[] = [];
-    const { data: blocks } = await supabase
-        .from('blocks')
-        .select('blocked_id')
-        .eq('blocker_id', user.id);
-    if (blocks) blockedIds = blocks.map(b => b.blocked_id);
+
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('current_state')
+            .eq('id', user.id)
+            .single();
+        currentUserProfile = profile;
+
+        // 1. Get user's blocked list to exclude
+        const { data: blocks } = await supabase
+            .from('blocks')
+            .select('blocked_id')
+            .eq('blocker_id', user.id);
+        if (blocks) blockedIds = blocks.map(b => b.blocked_id);
+    }
 
     // 2. Build Base Query
-    // 3. Apply Filters and Select
-    // Add resonance count to selection
-    // Note: We need to modify the select string.
-    // Re-writing the select to include count.
-
-    // Actually, I can't modify the query object easily after creation.
-    // I should rewrite step 2.
-
-    // START REWRITE: Manual Joins for Stability
-    // 1. Fetch Processes + Profiles (Profiles FK is usually robust or required)
     let selectQuery = `
             *,
             profiles (
@@ -55,7 +44,6 @@ export async function getFeed(filters: FeedFilters = {}) {
             )
     `;
 
-    // Re-initializing query with new select
     let mainQuery = supabase
         .from('processes')
         .select(selectQuery)
@@ -65,6 +53,7 @@ export async function getFeed(filters: FeedFilters = {}) {
 
     // Apply Filters
     if (filters.type === 'following') {
+        if (!user) return []; // Guests cannot have following feed
         const { data: follows } = await supabase.from('follows').select('followed_id').eq('follower_id', user.id);
         const followedIds = follows?.map(f => f.followed_id) || [];
         if (followedIds.length === 0) return [];
@@ -91,7 +80,7 @@ export async function getFeed(filters: FeedFilters = {}) {
     // Filter: Disciplines (In-Memory)
     if (filters.disciplines && filters.disciplines.length > 0) {
         filteredData = filteredData.filter((post: any) => {
-            if (!post.profiles) return false; // Skip posts with no profile
+            if (!post.profiles) return false;
             const authorDisciplines = post.profiles.disciplines || [];
             return filters.disciplines!.some((d: string) => authorDisciplines.includes(d));
         });
@@ -100,14 +89,9 @@ export async function getFeed(filters: FeedFilters = {}) {
     // --- MANUAL JOINS ---
     const processIds = filteredData.map((p: any) => p.id);
 
-    // A. Fetch Feedback Counts (if needed for filter or display)
-    // Even if not filtering, "Needs Feedback" badge might rely on it? 
-    // The filter relies on it.
+    // A. Fetch Feedback Counts
     let feedbackCounts: Record<string, number> = {};
     if (processIds.length > 0) {
-        // This is a bit tricky to get counts by group in Supabase without rpc
-        // But we can just fetch all feedback for these posts (lightweight id)
-        // Or rely on the fact that MVP scale is small.
         const { data: fb } = await supabase
             .from('feedback')
             .select('post_id')
@@ -118,16 +102,14 @@ export async function getFeed(filters: FeedFilters = {}) {
         });
     }
 
-    // Filter: Needs Feedback (count === 0)
+    // Filter: Needs Feedback
     if (filters.needsFeedback) {
         filteredData = filteredData.filter((post: any) => {
             return (feedbackCounts[post.id] || 0) === 0;
         });
-        // Re-calculate processIds after filtering? 
-        // No, we already fetched everything, just filtering the result list.
     }
 
-    // B. Fetch Resonances (Count & My Status)
+    // B. Fetch Resonances
     let resonanceCounts: Record<string, number> = {};
     let myResonances: Set<string> = new Set();
 
@@ -139,7 +121,7 @@ export async function getFeed(filters: FeedFilters = {}) {
 
         res?.forEach((r: any) => {
             resonanceCounts[r.process_id] = (resonanceCounts[r.process_id] || 0) + 1;
-            if (r.user_id === user.id) {
+            if (user && r.user_id === user.id) {
                 myResonances.add(r.process_id);
             }
         });
@@ -150,7 +132,7 @@ export async function getFeed(filters: FeedFilters = {}) {
         ...post,
         hasResonated: myResonances.has(post.id),
         resonanceCount: resonanceCounts[post.id] || 0,
-        feedbackCount: feedbackCounts[post.id] || 0 // Added for good measure
+        feedbackCount: feedbackCounts[post.id] || 0
     }));
 
     return enrichedData;

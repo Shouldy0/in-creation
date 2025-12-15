@@ -73,12 +73,14 @@ export async function updateSession(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser()
 
     // Protected Routes Pattern
+    // Protected Routes Pattern
+    // We allow Public access to /feed, /profile, /process
+    // We strictly protect /settings, /onboarding, /process/start, /process/[id]/edit
     if (
-        request.nextUrl.pathname.startsWith('/feed') ||
-        request.nextUrl.pathname.startsWith('/process') ||
-        request.nextUrl.pathname.startsWith('/profile') ||
         request.nextUrl.pathname.startsWith('/settings') ||
-        request.nextUrl.pathname.startsWith('/onboarding')
+        request.nextUrl.pathname.startsWith('/onboarding') ||
+        request.nextUrl.pathname.startsWith('/process/start') ||
+        request.nextUrl.pathname.includes('/edit')
     ) {
         if (!user) {
             return NextResponse.redirect(new URL('/login', request.url))

@@ -138,10 +138,12 @@ export default async function ProcessDetailPage({ params }: { params: Promise<{ 
             />
           </div>
 
-          <div className="p-6 bg-gradient-to-b from-paper to-ink rounded-xl border border-ink">
-            <h3 className="font-serif text-xl mb-4 text-accent">Creative Mentor</h3>
-            <MentorPanel processId={process.id} />
-          </div>
+          {isOwner && (
+            <div className="p-6 bg-gradient-to-b from-paper to-ink rounded-xl border border-ink">
+              <h3 className="font-serif text-xl mb-4 text-accent">Creative Mentor</h3>
+              <MentorPanel processId={process.id} />
+            </div>
+          )}
         </div >
 
       </div >
