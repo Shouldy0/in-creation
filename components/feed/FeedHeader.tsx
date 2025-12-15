@@ -13,7 +13,7 @@ import UserSearch from './UserSearch'; // Import
 interface FeedHeaderProps {
     currentState: string;
     viewMode: 'state' | 'following';
-    currentUserId: string;
+    currentUserId?: string;
 }
 
 export default function FeedHeader({ currentState, viewMode, currentUserId }: FeedHeaderProps) {
@@ -55,32 +55,44 @@ export default function FeedHeader({ currentState, viewMode, currentUserId }: Fe
                 >
                     Scopri
                 </Link>
-                <Link
-                    href="/feed?type=following"
-                    className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${viewMode === 'following'
-                        ? 'bg-foreground text-background shadow-sm'
-                        : 'text-stone hover:text-foreground'
-                        }`}
-                >
-                    Seguiti
-                </Link>
+                {currentUserId && (
+                    <>
+                        <Link
+                            href="/feed?type=following"
+                            className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${viewMode === 'following'
+                                ? 'bg-foreground text-background shadow-sm'
+                                : 'text-stone hover:text-foreground'
+                                }`}
+                        >
+                            Seguiti
+                        </Link>
 
-                <Link
-                    href={`/profile/${currentUserId}`}
-                    className="px-5 py-2 rounded-full text-sm font-medium text-stone hover:text-foreground transition-all"
-                >
-                    Profilo
-                </Link>
+                        <Link
+                            href={`/profile/${currentUserId}`}
+                            className="px-5 py-2 rounded-full text-sm font-medium text-stone hover:text-foreground transition-all"
+                        >
+                            Profilo
+                        </Link>
 
-                {/* Separator if needed, or just gap */}
-                <div className="w-px bg-stone/20 my-1 mx-1"></div>
+                        <div className="w-px bg-stone/20 my-1 mx-1"></div>
 
-                <Link
-                    href="/process/start"
-                    className="px-4 py-2 rounded-full text-sm font-medium text-accent hover:bg-accent/10 transition-colors flex items-center gap-1"
-                >
-                    <span>+</span> New
-                </Link>
+                        <Link
+                            href="/process/start"
+                            className="px-4 py-2 rounded-full text-sm font-medium text-accent hover:bg-accent/10 transition-colors flex items-center gap-1"
+                        >
+                            <span>+</span> New
+                        </Link>
+                    </>
+                )}
+
+                {!currentUserId && (
+                    <Link
+                        href="/login"
+                        className="px-5 py-2 rounded-full text-sm font-medium text-accent hover:text-accent/80 transition-all border-l border-stone/20 ml-2"
+                    >
+                        Login
+                    </Link>
+                )}
             </div>
 
             {/* Create Action Removed from outside */}

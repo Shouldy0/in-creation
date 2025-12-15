@@ -12,31 +12,34 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) {
-        redirect('/login');
-    }
-
-    const { type } = await searchParams; // Unwrap for Next 15/16
-    const viewMode = (type === 'following' ? 'following' : 'state');
-
-    // Get user's current state and beta access
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('current_state, beta_access')
-        .eq('id', user.id)
-        .single();
-
-    // Check Beta Access - REMOVED
-    // if (!profile?.beta_access) {
-    //     return <BetaLockScreen />;
+    // Removed redirect for public access
+    // if (!user) {
+    //     redirect('/login');
     // }
 
-    // Default to 'Resting' or handle error
-    const userCreativeState = profile?.current_state || 'Resting';
+    const { type } = await searchParams;
+    const viewMode = (type === 'following' ? 'following' : 'state');
+
+    // Get user's current state (if logged in)
+    let userCreativeState = 'Resting';
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('current_state')
+            .eq('id', user.id)
+            .single();
+        userCreativeState = profile?.current_state || 'Resting';
+    }
+
+    // If guest tries to access 'following' or 'profile', maybe redirect or show empty?
+    // For now, let's allow 'state' view for guests.
 
     // Fetch feed data
     const initialPosts = await getFeed({
-        type: viewMode
+        type: viewMode,
+        // If guest, we might want to pass explicit state filter if URL param supports it?
+        // Currently getFeed uses userCreativeState for 'state' logic.
+        // For guests, 'Resting' default is fine for now.
     });
 
     return (
@@ -45,7 +48,7 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
                 <FeedHeader
                     currentState={userCreativeState}
                     viewMode={viewMode}
-                    currentUserId={user.id}
+                    currentUserId={user?.id}
                 />
 
                 <Feed
