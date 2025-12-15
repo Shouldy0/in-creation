@@ -48,7 +48,8 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
     // We pass it to Feed component.
     // Fetch Discovery Feed (3 items)
     const discoveryPosts = await getDiscoveryFeed(userCreativeState);
-    // const discoveryPosts: any[] = [];
+    const { getThematicPaths } = await import('@/actions/feed');
+    const thematicPaths = await getThematicPaths();
 
     return (
         <main className="min-h-screen bg-background p-4 md:p-8 pb-20">
@@ -62,6 +63,7 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
                 <Feed
                     initialPosts={initialPosts}
                     discoveryPosts={discoveryPosts}
+                    thematicPaths={thematicPaths}
                     userCreativeState={userCreativeState}
                     currentUserId={user?.id}
                 />

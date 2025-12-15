@@ -6,16 +6,17 @@ import FilterPanel from './FilterPanel';
 import ProcessCard from './ProcessCard';
 import EmptyState from './EmptyState';
 import { ProcessCardSkeleton } from '@/components/ui/Skeleton';
-import DiscoveryCard from './DiscoveryCard';
+
 
 interface FeedProps {
     initialPosts: any[];
     discoveryPosts?: any[];
+    thematicPaths?: any[];
     userCreativeState: string;
     currentUserId?: string;
 }
 
-export default function Feed({ initialPosts, discoveryPosts = [], userCreativeState, currentUserId }: FeedProps) {
+export default function Feed({ initialPosts, discoveryPosts = [], thematicPaths = [], userCreativeState, currentUserId }: FeedProps) {
     const [posts, setPosts] = useState(initialPosts);
     const [filters, setFilters] = useState<FeedFilters>({
         disciplines: [],
@@ -67,15 +68,16 @@ export default function Feed({ initialPosts, discoveryPosts = [], userCreativeSt
                     {posts.length === 0 ? (
                         <div className="space-y-12">
                             <EmptyState />
+                            {/* EMPTY STATE DISCOVERY */}
                             {discoveryPosts.length > 0 && !isFiltering && (
                                 <section className="py-8 animate-fade border-t border-stone/10">
                                     <div className="flex items-baseline justify-between mb-4 px-1">
                                         <h3 className="font-serif text-xl text-foreground">Scopri</h3>
                                         <span className="text-xs text-stone uppercase tracking-widest">Fuori dal tuo stato</span>
                                     </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                                         {discoveryPosts.map((dp: any) => (
-                                            <DiscoveryCard key={dp.id} process={dp} />
+                                            <ProcessCard key={dp.id} process={dp} variant="compact" currentUserId={currentUserId} />
                                         ))}
                                     </div>
                                 </section>
@@ -87,6 +89,10 @@ export default function Feed({ initialPosts, discoveryPosts = [], userCreativeSt
                                 // Inject Discovery after 3rd item (index 2)
                                 const showDiscovery = index === 2 && discoveryPosts.length > 0 && !isFiltering && filters.disciplines?.length === 0 && filters.phases?.length === 0;
 
+                                // Inject Thematic Paths after Discovery (or after let's say 4th item if discovery shown, or just after 5th item)
+                                // Let's put it at the very bottom or after index 4.
+                                const showThematic = index === 4 && thematicPaths.length > 0 && !isFiltering;
+
                                 return (
                                     <div key={post.id} className="space-y-6">
                                         <ProcessCard
@@ -94,41 +100,58 @@ export default function Feed({ initialPosts, discoveryPosts = [], userCreativeSt
                                             currentUserId={currentUserId}
                                         />
 
-
-
                                         {showDiscovery && (
                                             <section className="py-8 animate-fade">
                                                 <div className="flex items-baseline justify-between mb-4 px-1">
                                                     <h3 className="font-serif text-xl text-foreground">Scopri</h3>
                                                     <span className="text-xs text-stone uppercase tracking-widest">Fuori dal tuo stato</span>
                                                 </div>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                                     {discoveryPosts.map((dp: any) => (
-                                                        <DiscoveryCard key={dp.id} process={dp} />
+                                                        <ProcessCard key={dp.id} process={dp} variant="compact" currentUserId={currentUserId} />
                                                     ))}
                                                 </div>
                                                 <div className="w-full h-px bg-gradient-to-r from-transparent via-stone/20 to-transparent mt-8"></div>
                                             </section>
                                         )}
+
+                                        {showThematic && thematicPaths.map((path: any, idx: number) => (
+                                            <section key={idx} className="py-8 animate-fade">
+                                                <div className="mb-4 px-1">
+                                                    <h3 className="font-serif text-xl text-foreground">{path.title}</h3>
+                                                    <p className="text-xs text-stone mt-1">{path.description}</p>
+                                                </div>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                                    {path.processes.map((p: any) => (
+                                                        <ProcessCard key={p.id} process={p} variant="compact" currentUserId={currentUserId} />
+                                                    ))}
+                                                </div>
+                                                <div className="w-full h-px bg-gradient-to-r from-transparent via-stone/20 to-transparent mt-8"></div>
+                                            </section>
+                                        ))}
                                     </div>
                                 );
                             })}
-
-                            {posts.length < 3 && discoveryPosts.length > 0 && !isFiltering && (
-                                <section className="py-8 animate-fade">
-                                    <div className="flex items-baseline justify-between mb-4 px-1">
-                                        <h3 className="font-serif text-xl text-foreground">Scopri</h3>
-                                        <span className="text-xs text-stone uppercase tracking-widest">Fuori dal tuo stato</span>
-                                    </div>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-                                        {discoveryPosts.map((dp: any) => (
-                                            <DiscoveryCard key={dp.id} process={dp} />
-                                        ))}
-                                    </div>
-                                </section>
-                            )}
                         </>
                     )}
+                </div>
+            )}
+            {/* Fallback if list is short */}
+            {posts.length < 5 && thematicPaths.length > 0 && !isFiltering && posts.length > 0 && (
+                <div className="space-y-8">
+                    {thematicPaths.map((path: any, idx: number) => (
+                        <section key={idx} className="py-8 animate-fade border-t border-stone/10">
+                            <div className="mb-4 px-1">
+                                <h3 className="font-serif text-xl text-foreground">{path.title}</h3>
+                                <p className="text-xs text-stone mt-1">{path.description}</p>
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                {path.processes.map((p: any) => (
+                                    <ProcessCard key={p.id} process={p} variant="compact" currentUserId={currentUserId} />
+                                ))}
+                            </div>
+                        </section>
+                    ))}
                 </div>
             )}
 

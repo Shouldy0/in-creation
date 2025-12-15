@@ -57,22 +57,22 @@ export default function UserSearch() {
 
             {isOpen && results.length > 0 && (
                 <div
-                    className="absolute top-full left-0 w-full mt-2 bg-paper border border-ink rounded-lg shadow-xl overflow-hidden z-50 p-2 animate-in fade-in slide-in-from-top-1 duration-150"
+                    className="absolute top-full left-0 w-full mt-2 bg-paper border border-ink rounded-lg shadow-sm overflow-hidden z-50 p-1 animate-in fade-in slide-in-from-top-1 duration-150"
                     onMouseLeave={() => setIsOpen(false)}
                 >
                     {results.map((user) => (
-                        <div key={user.id} className="flex items-center justify-between p-2 hover:bg-ink rounded-lg group transition-colors">
-                            <Link href={`/profile/${user.id}`} className="flex items-center gap-3 flex-1">
-                                <div className="w-8 h-8 rounded-full bg-background flex items-center justify-center text-xs border border-graphite overflow-hidden">
+                        <div key={user.id} className="flex items-center justify-between p-2 hover:bg-stone/5 rounded-md group transition-colors">
+                            <Link href={`/profile/${user.id}`} className="flex items-center gap-3 flex-1 min-w-0">
+                                <div className="w-8 h-8 rounded-full bg-stone/10 flex items-center justify-center text-xs border border-transparent overflow-hidden">
                                     {user.avatar_url ? (
                                         <img src={user.avatar_url} className="w-full h-full object-cover" />
                                     ) : user.username?.[0]}
                                 </div>
-                                <div className="text-left">
-                                    <p className="text-sm font-medium text-foreground">{user.username}</p>
-                                    <div className="flex gap-1">
+                                <div className="text-left min-w-0">
+                                    <p className="text-sm font-medium text-foreground truncate">{user.username}</p>
+                                    <div className="flex gap-1 overflow-hidden">
                                         {user.disciplines?.slice(0, 1).map((d: string) => (
-                                            <span key={d} className="text-[10px] text-stone">{d}</span>
+                                            <span key={d} className="text-[10px] text-stone truncate">{d}</span>
                                         ))}
                                     </div>
                                 </div>

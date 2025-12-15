@@ -197,3 +197,42 @@ export async function getDiscoveryFeed(currentUserState?: string) {
     // Take top 3
     return shuffled.slice(0, 3);
 }
+
+export async function getThematicPaths() {
+    const supabase = await createClient();
+
+    // For now, generate 1 curated path dynamically
+    // In a real app, this would come from a 'collections' table
+
+    // Let's look for "Flow" or "Idea" items generally
+    const { data } = await supabase
+        .from('processes')
+        .select(`
+            id,
+            title,
+            phase,
+            media_url,
+            media_type,
+            created_at,
+            profiles!inner (
+                username,
+                current_state
+            )
+        `)
+        .eq('status', 'published')
+        .eq('visibility', 'public')
+        .limit(20);
+
+    if (!data || data.length < 3) return [];
+
+    // Simple randomization for variety
+    const shuffled = [...data].sort(() => 0.5 - Math.random());
+
+    return [
+        {
+            title: "Percorsi di Flusso",
+            description: "Esplorazioni fluide e intuitive selezionate per te.",
+            processes: shuffled.slice(0, 3)
+        }
+    ];
+}
