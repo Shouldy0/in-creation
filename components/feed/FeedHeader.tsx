@@ -45,10 +45,10 @@ export default function FeedHeader({ currentState, viewMode, currentUserId }: Fe
             <h1 className="text-4xl md:text-5xl font-serif text-foreground text-center">Studio</h1>
 
             {/* Segmented Control */}
-            <div className="flex bg-paper p-1.5 rounded-full border border-ink w-fit mx-auto relative">
+            <div className="flex bg-paper p-1.5 rounded-full border border-ink w-fit mx-auto relative max-w-full overflow-x-auto scrollbar-hide">
                 <Link
                     href="/feed?type=state"
-                    className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${viewMode === 'state'
+                    className={`px-5 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 ${viewMode === 'state'
                         ? 'bg-foreground text-background shadow-sm'
                         : 'text-stone hover:text-foreground'
                         }`}
@@ -59,14 +59,14 @@ export default function FeedHeader({ currentState, viewMode, currentUserId }: Fe
                     <>
                         <Link
                             href="/co-process"
-                            className="px-5 py-2 rounded-full text-sm font-medium text-stone hover:text-foreground transition-all"
+                            className="px-5 py-2 rounded-full text-sm font-medium text-stone hover:text-foreground transition-all whitespace-nowrap flex-shrink-0"
                         >
                             Co-Processes
                         </Link>
 
                         <Link
                             href="/feed?type=following"
-                            className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${viewMode === 'following'
+                            className={`px-5 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap flex-shrink-0 ${viewMode === 'following'
                                 ? 'bg-foreground text-background shadow-sm'
                                 : 'text-stone hover:text-foreground'
                                 }`}
@@ -76,16 +76,16 @@ export default function FeedHeader({ currentState, viewMode, currentUserId }: Fe
 
                         <Link
                             href={`/profile/${currentUserId}`}
-                            className="px-5 py-2 rounded-full text-sm font-medium text-stone hover:text-foreground transition-all"
+                            className="px-5 py-2 rounded-full text-sm font-medium text-stone hover:text-foreground transition-all whitespace-nowrap flex-shrink-0"
                         >
                             Profilo
                         </Link>
 
-                        <div className="w-px bg-stone/20 my-1 mx-1"></div>
+                        <div className="w-px bg-stone/20 my-1 mx-1 flex-shrink-0"></div>
 
                         <Link
                             href="/process/start"
-                            className="px-4 py-2 rounded-full text-sm font-medium text-accent hover:bg-accent/10 transition-colors flex items-center gap-1"
+                            className="px-4 py-2 rounded-full text-sm font-medium text-accent hover:bg-accent/10 transition-colors flex items-center gap-1 whitespace-nowrap flex-shrink-0"
                         >
                             <span>+</span> New
                         </Link>
@@ -95,7 +95,7 @@ export default function FeedHeader({ currentState, viewMode, currentUserId }: Fe
                 {!currentUserId && (
                     <Link
                         href="/login"
-                        className="px-5 py-2 rounded-full text-sm font-medium text-accent hover:text-accent/80 transition-all border-l border-stone/20 ml-2"
+                        className="px-5 py-2 rounded-full text-sm font-medium text-accent hover:text-accent/80 transition-all border-l border-stone/20 ml-2 whitespace-nowrap flex-shrink-0"
                     >
                         Login
                     </Link>
