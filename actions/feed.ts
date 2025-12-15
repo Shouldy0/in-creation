@@ -137,3 +137,63 @@ export async function getFeed(filters: FeedFilters = {}) {
 
     return enrichedData;
 }
+
+export async function getDiscoveryFeed(currentUserState?: string) {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Base query: Published & Public
+    let query = supabase
+        .from('processes')
+        .select(`
+            id,
+            title,
+            phase,
+            media_url,
+            media_type,
+            created_at,
+            profiles!inner (
+                username,
+                current_state
+            )
+        `)
+        .eq('status', 'published')
+        .eq('visibility', 'public')
+        // Ensure we only get posts where author state is DIFFERENT from current user
+        .neq('profiles.current_state', currentUserState || 'Resting');
+
+    // If logged in, exclude own posts
+    if (user) {
+        query = query.neq('user_id', user.id);
+    }
+
+    // Fetch a batch to shuffle
+    query = query.order('created_at', { ascending: false }).limit(50);
+
+    const { data, error } = await query;
+
+    if (error || !data || data.length === 0) return [];
+
+    // Deterministic Shuffle based on Date
+    const today = new Date().toDateString(); // "Mon Dec 15 2025"
+
+    // Simple seeded random function
+    const seededRandom = (seed: string) => {
+        let hash = 0;
+        for (let i = 0; i < seed.length; i++) {
+            hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const x = Math.sin(hash) * 10000;
+        return x - Math.floor(x);
+    };
+
+    // Shuffle
+    const shuffled = [...data].sort((a, b) => {
+        const seedA = today + a.id;
+        const seedB = today + b.id;
+        return seededRandom(seedA) - seededRandom(seedB);
+    });
+
+    // Take top 3
+    return shuffled.slice(0, 3);
+}

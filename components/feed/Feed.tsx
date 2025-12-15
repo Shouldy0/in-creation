@@ -6,7 +6,6 @@ import FilterPanel from './FilterPanel';
 import ProcessCard from './ProcessCard';
 import EmptyState from './EmptyState';
 import { ProcessCardSkeleton } from '@/components/ui/Skeleton';
-
 import DiscoveryCard from './DiscoveryCard';
 
 interface FeedProps {
@@ -25,41 +24,19 @@ export default function Feed({ initialPosts, discoveryPosts = [], userCreativeSt
     });
     const [isFiltering, setIsFiltering] = useState(false);
 
-    // If initialPosts change (e.g. revalidation from server after state change), update local state
     useEffect(() => {
         setPosts(initialPosts);
-        // Reset filters on state change? Maybe better to keep them?
-        // Let's reset to avoid confusion as contexts change heavily
         setFilters({ disciplines: [], phases: [], needsFeedback: false });
     }, [initialPosts]);
 
-    // Handle Filter Changes
     useEffect(() => {
-        // Skip first render if we want to rely on initialPosts, but actually 
-        // initialPosts corresponds to empty filters.
-        // So only fetch if filters are NOT empty OR if we need to refresh.
-        // A simple equality check or just ALWAYS fetch when filters change (debounced?)
-
-        // Actually, let's just fetch when filters change.
-        // If filters are empty, we can revert to initialPosts to save a call IF initialPosts is fresh.
-        // But for simplicity, let's just fetch.
-
         const fetchFiltered = async () => {
-            // Avoid double fetch on mount if filters are default
-            // But we need to detect if this is mount.
-            // We can just rely on `isFiltering` flag to show loading state.
-
             // Optimization: If filters are all empty/false, and we have initialPosts, use them?
             const isEmptyFilters = filters.disciplines?.length === 0 && filters.phases?.length === 0 && !filters.needsFeedback;
 
-            if (isEmptyFilters && initialPosts) {
-                // Optimization: Revert to initial passed data if compatible? 
-                // Actually, let's NOT assume initialPosts are still fresh if user has been navigating.
-                // But for MVP, let's try to avoid aggressive over-fetching.
-            }
-
             setIsFiltering(true);
             try {
+                // Convert Set to Array if needed, but filters are arrays here.
                 const data = await getFeed(filters);
                 setPosts(data || []);
             } catch (err) {
@@ -69,10 +46,8 @@ export default function Feed({ initialPosts, discoveryPosts = [], userCreativeSt
             }
         };
 
-        // Debounce could be good here
         const timeoutId = setTimeout(fetchFiltered, 300);
         return () => clearTimeout(timeoutId);
-
     }, [filters]);
 
     return (
@@ -119,6 +94,12 @@ export default function Feed({ initialPosts, discoveryPosts = [], userCreativeSt
                                             currentUserId={currentUserId}
                                         />
 
+                                        {/* <div className="p-4 bg-yellow-100 text-yellow-900 rounded border border-yellow-200 shadow-sm">
+                                            <strong>DEBUG MODE (Card Disabled)</strong>
+                                            <p>{post.title}</p>
+                                            <p className="text-xs text-stone-500">ID: {post.id}</p>
+                                        </div> */}
+
                                         {showDiscovery && (
                                             <section className="py-8 animate-fade">
                                                 <div className="flex items-baseline justify-between mb-4 px-1">
@@ -130,8 +111,6 @@ export default function Feed({ initialPosts, discoveryPosts = [], userCreativeSt
                                                         <DiscoveryCard key={dp.id} process={dp} />
                                                     ))}
                                                 </div>
-
-                                                {/* Divider after section */}
                                                 <div className="w-full h-px bg-gradient-to-r from-transparent via-stone/20 to-transparent mt-8"></div>
                                             </section>
                                         )}
@@ -139,12 +118,6 @@ export default function Feed({ initialPosts, discoveryPosts = [], userCreativeSt
                                 );
                             })}
 
-                            {/* Fallback: If less than 3 items, show Discovery at bottom? 
-                                User said "After N items or when feed is empty".
-                                If Feed is Empty, we show EmptyState. 
-                                Let's modify EmptyState to showing Discovery if available? 
-                                Or just append at bottom if list < 3.
-                            */}
                             {posts.length < 3 && discoveryPosts.length > 0 && !isFiltering && (
                                 <section className="py-8 animate-fade">
                                     <div className="flex items-baseline justify-between mb-4 px-1">

@@ -2,7 +2,7 @@ import Feed from '@/components/feed/Feed';
 import FeedHeader from '@/components/feed/FeedHeader';
 import UserSearch from '@/components/feed/UserSearch'; // Import
 import { createClient } from '@/utils/supabase/server';
-import { getFeed } from '@/actions/feed';
+import { getFeed, getDiscoveryFeed } from '@/actions/feed';
 import { redirect } from 'next/navigation';
 import BetaLockScreen from '@/components/beta/BetaLockScreen';
 
@@ -46,8 +46,9 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
     // Only if viewMode is 'state' (default feed), maybe?
     // User requested "inside the feed".
     // We pass it to Feed component.
-    const { getDiscoveryFeed } = await import('@/actions/feed');
+    // Fetch Discovery Feed (3 items)
     const discoveryPosts = await getDiscoveryFeed(userCreativeState);
+    // const discoveryPosts: any[] = [];
 
     return (
         <main className="min-h-screen bg-background p-4 md:p-8 pb-20">

@@ -30,13 +30,13 @@ export default function ProcessCard({ process, currentUserId }: ProcessCardProps
                 <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
                         <div className="w-6 h-6 rounded-full bg-paper flex items-center justify-center text-[10px] overflow-hidden border border-ink">
-                            {process.profiles.avatar_url ? (
-                                <img src={process.profiles.avatar_url} alt={process.profiles.username} className="w-full h-full object-cover" />
+                            {process.profiles?.avatar_url ? (
+                                <img src={process.profiles.avatar_url} alt={process.profiles?.username} className="w-full h-full object-cover" />
                             ) : (
-                                (process.profiles.username || '?')[0].toUpperCase()
+                                (process.profiles?.username || '?')[0].toUpperCase()
                             )}
                         </div>
-                        <p className="text-xs font-medium text-stone uppercase tracking-wide group-hover:text-foreground transition-colors">{process.profiles.username || 'Unknown'}</p>
+                        <p className="text-xs font-medium text-stone uppercase tracking-wide group-hover:text-foreground transition-colors">{process.profiles?.username || 'Unknown'}</p>
                     </div>
                     <span className="text-[10px] text-stone/60">
                         {process.phase}

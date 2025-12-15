@@ -45,13 +45,13 @@ export default function DiscoveryCard({ process }: DiscoveryCardProps) {
                     {/* Text Content */}
                     <div className="flex flex-col justify-center min-w-0">
                         <span className="text-[10px] uppercase tracking-widest text-stone mb-1 block">
-                            {process.profiles.current_state}
+                            {process.profiles?.current_state || 'Unknown'}
                         </span>
                         <h4 className="font-serif text-foreground text-lg leading-tight truncate pr-2 group-hover:underline decoration-stone/30 underline-offset-4">
                             {process.title}
                         </h4>
                         <p className="text-sm text-stone mt-1 truncate">
-                            by {process.profiles.username}
+                            by {process.profiles?.username || 'Unknown'}
                         </p>
                     </div>
                 </div>
