@@ -94,11 +94,7 @@ export default function Feed({ initialPosts, discoveryPosts = [], userCreativeSt
                                             currentUserId={currentUserId}
                                         />
 
-                                        {/* <div className="p-4 bg-yellow-100 text-yellow-900 rounded border border-yellow-200 shadow-sm">
-                                            <strong>DEBUG MODE (Card Disabled)</strong>
-                                            <p>{post.title}</p>
-                                            <p className="text-xs text-stone-500">ID: {post.id}</p>
-                                        </div> */}
+
 
                                         {showDiscovery && (
                                             <section className="py-8 animate-fade">
