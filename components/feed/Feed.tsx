@@ -7,13 +7,16 @@ import ProcessCard from './ProcessCard';
 import EmptyState from './EmptyState';
 import { ProcessCardSkeleton } from '@/components/ui/Skeleton';
 
+import DiscoveryCard from './DiscoveryCard';
+
 interface FeedProps {
     initialPosts: any[];
+    discoveryPosts?: any[];
     userCreativeState: string;
     currentUserId?: string;
 }
 
-export default function Feed({ initialPosts, userCreativeState, currentUserId }: FeedProps) {
+export default function Feed({ initialPosts, discoveryPosts = [], userCreativeState, currentUserId }: FeedProps) {
     const [posts, setPosts] = useState(initialPosts);
     const [filters, setFilters] = useState<FeedFilters>({
         disciplines: [],
@@ -85,19 +88,77 @@ export default function Feed({ initialPosts, userCreativeState, currentUserId }:
                     <ProcessCardSkeleton />
                 </div>
             ) : (
-                <div className="animate-fade">
+                <div className="animate-fade space-y-6">
                     {posts.length === 0 ? (
-                        <EmptyState />
-                    ) : (
-                        <div className="grid gap-6">
-                            {posts.map(post => (
-                                <ProcessCard
-                                    key={post.id}
-                                    process={post}
-                                    currentUserId={currentUserId}
-                                />
-                            ))}
+                        <div className="space-y-12">
+                            <EmptyState />
+                            {discoveryPosts.length > 0 && !isFiltering && (
+                                <section className="py-8 animate-fade border-t border-stone/10">
+                                    <div className="flex items-baseline justify-between mb-4 px-1">
+                                        <h3 className="font-serif text-xl text-foreground">Scopri</h3>
+                                        <span className="text-xs text-stone uppercase tracking-widest">Fuori dal tuo stato</span>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                        {discoveryPosts.map((dp: any) => (
+                                            <DiscoveryCard key={dp.id} process={dp} />
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
                         </div>
+                    ) : (
+                        <>
+                            {posts.map((post, index) => {
+                                // Inject Discovery after 3rd item (index 2)
+                                const showDiscovery = index === 2 && discoveryPosts.length > 0 && !isFiltering && filters.disciplines?.length === 0 && filters.phases?.length === 0;
+
+                                return (
+                                    <div key={post.id} className="space-y-6">
+                                        <ProcessCard
+                                            process={post}
+                                            currentUserId={currentUserId}
+                                        />
+
+                                        {showDiscovery && (
+                                            <section className="py-8 animate-fade">
+                                                <div className="flex items-baseline justify-between mb-4 px-1">
+                                                    <h3 className="font-serif text-xl text-foreground">Scopri</h3>
+                                                    <span className="text-xs text-stone uppercase tracking-widest">Fuori dal tuo stato</span>
+                                                </div>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                                    {discoveryPosts.map((dp: any) => (
+                                                        <DiscoveryCard key={dp.id} process={dp} />
+                                                    ))}
+                                                </div>
+
+                                                {/* Divider after section */}
+                                                <div className="w-full h-px bg-gradient-to-r from-transparent via-stone/20 to-transparent mt-8"></div>
+                                            </section>
+                                        )}
+                                    </div>
+                                );
+                            })}
+
+                            {/* Fallback: If less than 3 items, show Discovery at bottom? 
+                                User said "After N items or when feed is empty".
+                                If Feed is Empty, we show EmptyState. 
+                                Let's modify EmptyState to showing Discovery if available? 
+                                Or just append at bottom if list < 3.
+                            */}
+                            {posts.length < 3 && discoveryPosts.length > 0 && !isFiltering && (
+                                <section className="py-8 animate-fade">
+                                    <div className="flex items-baseline justify-between mb-4 px-1">
+                                        <h3 className="font-serif text-xl text-foreground">Scopri</h3>
+                                        <span className="text-xs text-stone uppercase tracking-widest">Fuori dal tuo stato</span>
+                                    </div>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                                        {discoveryPosts.map((dp: any) => (
+                                            <DiscoveryCard key={dp.id} process={dp} />
+                                        ))}
+                                    </div>
+                                </section>
+                            )}
+                        </>
                     )}
                 </div>
             )}
