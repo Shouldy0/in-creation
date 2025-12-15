@@ -54,7 +54,7 @@ export default async function FeedPage({ searchParams }: { searchParams: Promise
                 <Feed
                     initialPosts={initialPosts}
                     userCreativeState={userCreativeState}
-                    currentUserId={user.id}
+                    currentUserId={user?.id}
                 />
             </div>
         </main>
