@@ -61,7 +61,7 @@ export default function FeedHeader({ currentState, viewMode, currentUserId }: Fe
                             href="/co-process"
                             className="px-5 py-2 rounded-full text-sm font-medium text-stone hover:text-foreground transition-all"
                         >
-                            Co-Process
+                            Co-Processes
                         </Link>
 
                         <Link
