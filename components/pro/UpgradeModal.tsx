@@ -28,10 +28,10 @@ export default function UpgradeModal() {
                 <Star className="w-8 h-8 text-foreground" fill="currentColor" />
             </div>
 
-            <h2 className="text-3xl font-serif mb-4">Internal Work</h2>
+            <h2 className="text-3xl font-serif mb-4">PRO — Co-Creazione</h2>
             <p className="text-muted-foreground mb-8 leading-relaxed">
-                Co-Processes are deep, shared creative spaces.
-                Move beyond the feed into a private studio with your trusted peers.
+                Prezzo consigliato:<br />
+                <span className="font-medium text-foreground">€9 / mese (EU)</span> • <span className="font-medium text-foreground">$12 / mese (USA)</span>
             </p>
 
             <div className="bg-secondary/20 p-6 rounded-xl w-full mb-8 text-left space-y-4">
