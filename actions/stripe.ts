@@ -5,9 +5,14 @@ import { redirect } from 'next/navigation';
 import Stripe from 'stripe';
 import { headers } from 'next/headers';
 
+const isPlaceholder = !process.env.STRIPE_SECRET_KEY;
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder', {
     apiVersion: '2025-11-17.clover',
 });
+
+if (isPlaceholder) {
+    console.error("WARNING: Using placeholder Stripe key. Transactions will fail.");
+}
 
 export async function createCheckoutSession() {
     const supabase = await createClient();

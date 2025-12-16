@@ -16,8 +16,9 @@ export default function UpgradeModal() {
             if (url) {
                 window.location.href = url;
             }
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
+            alert(`Errore: ${error.message || 'Impossibile connettersi a Stripe'}`);
             setLoading(false);
         }
     };
