@@ -43,7 +43,7 @@ export async function createCheckoutSession() {
         await supabase.from('profiles').update({ stripe_customer_id: customerId }).eq('id', user.id);
     }
 
-    const priceId = process.env.STRIPE_PRICE_ID_PRO;
+    const priceId = process.env.STRIPE_PRICE_ID_PRO || 'price_1Set4SFQHVPUUsfZdm8LytKu';
 
     if (!priceId) {
         console.error("STRIPE_PRICE_ID_PRO not set");
