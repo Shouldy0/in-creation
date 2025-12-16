@@ -25,6 +25,12 @@ export async function createCoProcess(title: string, description: string) {
         throw new Error('You already have an active co-process.');
     }
 
+    // CHECK PRO PLAN
+    const { data: profile } = await supabase.from('profiles').select('plan').eq('id', user.id).single();
+    if (profile?.plan !== 'pro') {
+        throw new Error('This feature requires a PRO subscription.');
+    }
+
     const { data, error } = await supabase
         .from('co_processes')
         .insert({

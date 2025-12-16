@@ -19,6 +19,8 @@ export interface Database {
                     disciplines: string[] | null
                     current_state: 'Idea' | 'Blocked' | 'Flow' | 'Revision' | 'Resting' | null
                     avatar_url: string | null
+                    plan: 'free' | 'pro'
+                    stripe_customer_id: string | null
                 }
                 Insert: {
                     id: string
@@ -29,6 +31,8 @@ export interface Database {
                     disciplines?: string[] | null
                     current_state?: 'Idea' | 'Blocked' | 'Flow' | 'Revision' | 'Resting' | null
                     avatar_url?: string | null
+                    plan?: 'free' | 'pro'
+                    stripe_customer_id?: string | null
                 }
                 Update: {
                     id?: string
@@ -39,6 +43,8 @@ export interface Database {
                     disciplines?: string[] | null
                     current_state?: 'Idea' | 'Blocked' | 'Flow' | 'Revision' | 'Resting' | null
                     avatar_url?: string | null
+                    plan?: 'free' | 'pro'
+                    stripe_customer_id?: string | null
                 }
             }
             processes: {
@@ -245,6 +251,35 @@ export interface Database {
                     type: 'works' | 'needs_work' | 'inspired' | 'resonance'
                     content?: string | null
                     created_at?: string
+                }
+            }
+            subscriptions: {
+                Row: {
+                    id: string
+                    user_id: string
+                    status: string
+                    price_id: string | null
+                    created_at: string
+                    current_period_end: string | null
+                    cancel_at_period_end: boolean
+                }
+                Insert: {
+                    id: string
+                    user_id: string
+                    status: string
+                    price_id?: string | null
+                    created_at?: string
+                    current_period_end?: string | null
+                    cancel_at_period_end?: boolean
+                }
+                Update: {
+                    id?: string
+                    user_id?: string
+                    status?: string
+                    price_id?: string | null
+                    created_at?: string
+                    current_period_end?: string | null
+                    cancel_at_period_end?: boolean
                 }
             }
         }

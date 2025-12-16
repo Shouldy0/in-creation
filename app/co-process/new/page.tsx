@@ -1,78 +1,30 @@
-'use client';
+import { createClient } from '@/utils/supabase/server';
+import { redirect } from 'next/navigation';
+import UpgradeModal from '@/components/pro/UpgradeModal';
+import CoProcessForm from '@/components/co-process/CoProcessForm';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { createCoProcess } from '@/actions/co-process';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import Link from 'next/link';
+export default async function NewCoProcessPage() {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
 
-export default function NewCoProcessPage() {
-    const router = useRouter();
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    if (!user) {
+        redirect('/login');
+    }
 
-    const handleSubmit = async (formData: FormData) => {
-        setLoading(true);
-        setError(null);
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('plan')
+        .eq('id', user.id)
+        .single();
 
-        const title = formData.get('title') as string;
-        const description = formData.get('description') as string;
+    // FEATURE GATE: Check if user is PRO
+    if (profile?.plan !== 'pro') {
+        return (
+            <div className="container max-w-md mx-auto py-24 px-4">
+                <UpgradeModal />
+            </div>
+        );
+    }
 
-        try {
-            await createCoProcess(title, description);
-            // Action handles revalidate and redirects, or we redirect here
-            // Since server action returns data, we can redirect
-            router.push('/co-process');
-        } catch (e: any) {
-            setError(e.message || 'Failed to create co-process');
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <div className="container max-w-md mx-auto py-24 px-4">
-            <Link href="/co-process" className="text-sm text-muted-foreground hover:text-foreground mb-8 block">
-                ← Back
-            </Link>
-
-            <h1 className="text-3xl font-serif mb-2">New Co-Process</h1>
-            <p className="text-muted-foreground mb-8">Start a shared creative journey.</p>
-
-            <form action={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                    <label htmlFor="title" className="text-sm font-medium">Title</label>
-                    <Input
-                        id="title"
-                        name="title"
-                        placeholder="e.g. The Winter Garden"
-                        required
-                        className="bg-secondary/50 border-0"
-                    />
-                </div>
-
-                <div className="space-y-2">
-                    <label htmlFor="description" className="text-sm font-medium">Description (Optional)</label>
-                    <Textarea
-                        id="description"
-                        name="description"
-                        placeholder="What is this shared space for?"
-                        className="bg-secondary/50 border-0 resize-none h-32"
-                    />
-                </div>
-
-                {error && (
-                    <div className="text-destructive text-sm bg-destructive/10 p-3 rounded-md">
-                        {error}
-                    </div>
-                )}
-
-                <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? 'Creating...' : 'Create Co-Process'}
-                </Button>
-            </form>
-        </div>
-    );
+    return <CoProcessForm />;
 }

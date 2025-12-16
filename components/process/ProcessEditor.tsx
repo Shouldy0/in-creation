@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { updateProcessAutosave, publishProcess } from '@/actions/process';
-import { Loader2, ArrowLeft, Image as ImageIcon, Mic } from 'lucide-react';
+import { Loader2, ArrowLeft, Image as ImageIcon, Mic, Trash2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import MediaUploader from './MediaUploader'; // To be implemented
@@ -84,6 +84,18 @@ export default function ProcessEditor({ process }: ProcessEditorProps) {
                     <span className="text-xs text-stone transition-opacity duration-500">
                         {saving ? "Saving..." : lastSaved ? "Saved" : "Draft"}
                     </span>
+                    <button
+                        onClick={async () => {
+                            if (confirm("Are you sure you want to delete this process? This cannot be undone.")) {
+                                const { deleteProcess } = await import('@/actions/process');
+                                await deleteProcess(process.id);
+                            }
+                        }}
+                        className="text-stone hover:text-red-500 transition-colors mr-2 p-2"
+                        title="Delete Process"
+                    >
+                        <Trash2 size={20} />
+                    </button>
                     <button
                         onClick={handlePublish}
                         disabled={isPublishing}
